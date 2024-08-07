@@ -1,40 +1,41 @@
-import pandas as pd
-from datasets import Dataset
-from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments
-
-df = pd.read_csv('dataset.csv')
-
-texts = df['vietnamese'].tolist() + df['japanese'].tolist()
+import torch
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import TrainingArguments, Trainer
+from datasets import load_dataset, load_metric
 
 dataset = Dataset.from_dict({'text': texts})
-
 model_name = 'gpt2-xl'
+model = GPT2LMHeadModel.from_pretrained(model_name)
 tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 
+tokenizer.pad_token = tokenizer.eos_token
+dataset = load_dataset("csv", data_files="datasetcsv")
+train_data = dataset["train"].select([i for i in range(len(dataset["train"])) if i % 10 != 0])
+val_data = dataset["train"].select([i for i in range(len(dataset["train"])) if i % 10 == 0])
 def tokenize_function(examples):
-    return tokenizer(examples['text'], truncation=True, padding='max_length', max_length=512)
-
-tokenized_datasets = dataset.map(tokenize_function, batched=True, remove_columns=["text"])
-
-model = GPT2LMHeadModel.from_pretrained(model_name)
-
+    inputs = tokenizer(examples['vietnamese'], return_tensors='pt', padding='max_length', max_length=512, truncation=True)
+    labels = tokenizer(examples['japanese'], return_tensors='pt', padding='max_length', max_length=512, truncation=True)
+    return {'input_ids': inputs['input_ids'], 'labels': labels['input_ids']}
+train_data = train_data.map(tokenize_function, batched=True)
+val_data = val_data.map(tokenize_function, batched=True)
 training_args = TrainingArguments(
-    output_dir='./results',
+    output_dir='./model',
     overwrite_output_dir=True,
-    num_train_epochs=3,
-    per_device_train_batch_size=4,
-    save_steps=10_000,
-    save_total_limit=2,
+    num_train_epochs=0.5,
+    per_device_train_batch_size=2,
+    evaluation_strategy="steps",
+    eval_steps=100,
+    save_steps=500,
+    logging_steps=100,
     logging_dir='./logs',
-    logging_steps=500,
 )
-
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=tokenized_datasets,
+    train_dataset=train_data,
+    eval_dataset=val_data,
 )
-
 trainer.train()
+trainer.save_model()
 model.save_pretrained('./trained_model')
 tokenizer.save_pretrained('./trained_model')
