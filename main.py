@@ -35,4 +35,5 @@ trainer = Trainer(
     eval_dataset=val_data,
 )
 trainer.train()
-trainer.save_model()
+model.save_pretrained('./trained_model')
+tokenizer.save_pretrained('./trained_model')
