@@ -8,7 +8,7 @@ model = GPT2LMHeadModel.from_pretrained(model_name)
 tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 
 tokenizer.pad_token = tokenizer.eos_token
-dataset = load_dataset("csv", data_files="datasetcsv")
+dataset = load_dataset("csv", data_files="dataset.csv")
 train_data = dataset["train"].select([i for i in range(len(dataset["train"])) if i % 10 != 0])
 val_data = dataset["train"].select([i for i in range(len(dataset["train"])) if i % 10 == 0])
 def tokenize_function(examples):
