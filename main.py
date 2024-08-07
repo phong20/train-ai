@@ -3,7 +3,6 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from transformers import TrainingArguments, Trainer
 from datasets import load_dataset, load_metric
 
-dataset = Dataset.from_dict({'text': texts})
 model_name = 'gpt2-xl'
 model = GPT2LMHeadModel.from_pretrained(model_name)
 tokenizer = GPT2Tokenizer.from_pretrained(model_name)
