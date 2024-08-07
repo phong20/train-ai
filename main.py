@@ -36,5 +36,3 @@ trainer = Trainer(
 )
 trainer.train()
 trainer.save_model()
-model.save_pretrained('./trained_model')
-tokenizer.save_pretrained('./trained_model')
