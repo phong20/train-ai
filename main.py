@@ -11,8 +11,8 @@ dataset = load_dataset("csv", data_files="dataset.csv")
 train_data = dataset["train"].select([i for i in range(len(dataset["train"])) if i % 10 != 0])
 val_data = dataset["train"].select([i for i in range(len(dataset["train"])) if i % 10 == 0])
 def tokenize_function(examples):
-    inputs = tokenizer(examples['vietnamese'], return_tensors='pt', padding='max_length', max_length=512, truncation=True)
-    labels = tokenizer(examples['japanese'], return_tensors='pt', padding='max_length', max_length=512, truncation=True)
+    inputs = tokenizer(examples['vietnamese'], return_tensors='pt', padding='max_length', max_length=1014, truncation=True)
+    labels = tokenizer(examples['japanese'], return_tensors='pt', padding='max_length', max_length=1014, truncation=True)
     return {'input_ids': inputs['input_ids'], 'labels': labels['input_ids']}
 train_data = train_data.map(tokenize_function, batched=True)
 val_data = val_data.map(tokenize_function, batched=True)
